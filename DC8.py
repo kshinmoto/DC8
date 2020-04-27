@@ -5,6 +5,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
 from sklearn.ensemble import RandomForestClassifier
+#Import scikit-learn metrics module for accuracy calculation
+from sklearn import metrics
+from sklearn.naive_bayes import MultinomialNB
 
 # read in dataset, make sure to change path for file in your computer
 init_data = pd.read_csv('/Users/kaishinmoto/Downloads/winemag-data-130k-v2.csv')
@@ -82,7 +85,6 @@ print("Final DP: \n", dp['new_description'])
 train_x, test_x, train_y, test_y = train_test_split(X, y, test_size=0.1,random_state=10 )
 
 
-from sklearn.naive_bayes import MultinomialNB
 #Create a Gaussian Classifier
 mnb = MultinomialNB()
 
@@ -92,14 +94,13 @@ mnb.fit(train_x, train_y)
 #Predict the response for test dataset
 y_pred = mnb.predict(test_x)
 
-#Import scikit-learn metrics module for accuracy calculation
-from sklearn import metrics
 
 # Model Accuracy, how often is the classifier correct?
 print("MN Naive Bayes Accuracy: ",metrics.accuracy_score(test_y, y_pred))
 
-# Train multi-classification model with logistic regression
-lr = linear_model.LogisticRegression(max_iter= 1000)
+# Train multi-classification model with logistic regression, we raised max_iter because of convergence issues
+    # if you have any convergence issues yourself, you may raise the max_iter here
+lr = linear_model.LogisticRegression(max_iter= 10000)
 lr.fit(train_x, train_y)
 
 # Train multinomial logistic regression model
