@@ -5,6 +5,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
 #Import scikit-learn metrics module for accuracy calculation
 from sklearn import metrics
 from sklearn.naive_bayes import MultinomialNB
@@ -18,11 +19,29 @@ parsed_data = init_data[init_data.duplicated('description', keep=False)]
 print("Length of dataframe after duplicates are removed:", len(parsed_data))
 
 #remove null values
-parsed_data.dropna(subset=['description','points','price'])
+parsed_data.dropna(subset=['description','points'])
 print("Length of dataframe after NaNs are removed:", len(parsed_data))
 
 
 dp = parsed_data[['description','points']]
+print(dp)
+
+# same function used in example given
+def transform_points_simplified(points):
+    if points < 84:
+        return 1
+    elif points >= 84 and points < 88:
+        return 2
+    elif points >= 88 and points < 92:
+        return 3
+    elif points >= 92 and points < 96:
+        return 4
+    else:
+        return 5
+
+#Applying transform method and assigning result to new column "points_simplified"
+dp = dp.assign(points_simplified = dp['points'].apply(transform_points_simplified))
+dp = dp.dropna()
 print(dp)
 
 # remove the punctuations from description and create new column called new_description
@@ -50,25 +69,6 @@ def listToString(s):
 dp = dp.assign(final_description = dp['lemma_description'].apply(listToString))'''
 
 
-dp = dp.assign(description_length = dp['description'].apply(len))
-
-# same function used in example given
-def transform_points_simplified(points):
-    if points < 84:
-        return 1
-    elif points >= 84 and points < 88:
-        return 2
-    elif points >= 88 and points < 92:
-        return 3
-    elif points >= 92 and points < 96:
-        return 4
-    else:
-        return 5
-
-#Applying transform method and assigning result to new column "points_simplified"
-dp = dp.assign(points_simplified = dp['points'].apply(transform_points_simplified))
-dp = dp.dropna()
-print(dp)
 
 # assign x and y, if testing lemmatized version change new_description to final_description
 X = dp['new_description']
@@ -80,12 +80,12 @@ vectorizer.fit(X)
 X = vectorizer.transform(X)
 
 # print final version of dp being trained and tested, if doing lemmatized version change new_description to final_description
-print("Final DP: \n", dp['new_description'])
+print("Final DP: \n", dp['new_description'].head())
 
 train_x, test_x, train_y, test_y = train_test_split(X, y, test_size=0.1,random_state=10 )
 
 
-#Create a Gaussian Classifier
+#Create a MNB Classifier
 mnb = MultinomialNB()
 
 #Train the model using the training sets
@@ -118,5 +118,3 @@ rfc.fit(train_x, train_y)
 # Testing the model
 predictions = rfc.predict(test_x)
 print("Randon Forest Classifier: ", metrics.accuracy_score(test_y, predictions))
-
-
